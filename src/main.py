@@ -9,6 +9,7 @@ from classes import modifier
 from src.func.dataloader import parse_file_to_json
 from src.classes.analyzer import Analyzer
 from src.classes.modifier import Modifier
+from src.func.utils import filter_data
 
 
 ########## ---------- Main ---------- ##########
@@ -23,20 +24,43 @@ def main():
     modifier.q1_add_age()
     modifier.q1_add_gender()
 
-    print(analyzer.q1_age_distribution())
+    print(analyzer.q1_value_distribution())
     print(analyzer.q1_gender_distribution())
 
     ########## ---------- Question 2 ---------- ##########
     # At what age does the men become fathers first time (max age, min age, average age)?'
     print("\n\nQustion 2 : ")
     modifier.q2_add_fartherhood_year()
-    result_q2 = analyzer.q2_value_summary_with_filter(
-        val_col="height",
+    filtered_data_male = filter_data(
+        data,
         filter_col="gender",
         filter_value="Male",
         operator="=="
     )
+
+    result_q2 = analyzer.q2_value_summary(
+        filtered_data_male,
+        val_col="parenthood_start"
+    )
     print(result_q2)
+
+
+    ########## ---------- Question 3 ---------- ##########
+    # Is the distribution of first-time fatherhood age normal/sensible?
+    print("\n\nQustion 3 : ")
+    filtered_data_male_has_kids = filter_data(
+        filtered_data_male,
+        filter_col="parenthood_start",
+        filter_value="None",
+        operator="!="
+    )
+
+    result_q3 = analyzer.q1_value_distribution(
+        column_name="parenthood_start",
+        data=filtered_data_male_has_kids,
+        bin_size=10
+    )
+
 
 if __name__ == "__main__":
     main()

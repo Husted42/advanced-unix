@@ -8,20 +8,26 @@ def set_working_directory_to_repo_root(root="advanced-unix"):
 set_working_directory_to_repo_root()
 
 ########## ---------- Imports ---------- ##########
-from src.func.utils import get_min
 from src.func.utils import get_max
+from src.func.utils import get_min
 
 
 class Analyzer:
     def __init__(self, data):
         self.data = data
 
-    def q1_age_distribution(self):
+    def q1_value_distribution(self, column_name='age', data = None, bin_size=10):
         age_bins = {}
-        bin_size = 10
 
-        for person in self.data:
-            age = person.get("age")
+        # Check if external data was specified, if not use self.
+        if data == None: data = self.data
+
+        # Allow for passing a dict
+        if isinstance(data, dict):
+            data = data.values()
+
+        for person in data:
+            age = person.get(column_name)
 
             if age is None or age < 0:
                 continue
@@ -53,40 +59,30 @@ class Analyzer:
 
     # We make the implementation for an arbitrary filter
     # we need thils later
-    def q2_value_summary_with_filter(
-        self,
-        val_col: str,
-        filter_col: str,
-        filter_value,
-        operator: str = "=="
-    ):
+    def q2_value_summary(self, data, val_col: str):
         values = []
 
-        for person in self.data:
+        # If data is a dict, iterate over its values
+        if isinstance(data, dict):
+            data = data.values()
+
+        for person in data:
             value = person.get(val_col)
-            filter_val = person.get(filter_col)
 
-            if value is None or filter_val is None:
-                continue
-
-            if operator == "==" and filter_val == filter_value:
-                values.append(value)
-            elif operator == "!=" and filter_val != filter_value:
-                values.append(value)
-            elif operator == ">" and filter_val > filter_value:
-                values.append(value)
-            elif operator == ">=" and filter_val >= filter_value:
-                values.append(value)
-            elif operator == "<" and filter_val < filter_value:
-                values.append(value)
-            elif operator == "<=" and filter_val <= filter_value:
+            if value is not None:
                 values.append(value)
 
         if not values:
             return None
 
         avg = sum(values) / len(values)
-        min = get_min(values)
-        max = get_max(values)
+        minimum = get_min(values)
+        maximum = get_max(values)
+        count = len(values)
 
-        return {"max": max, "min":min, "avg":avg }
+        return {
+            "max": maximum,
+            "min": minimum,
+            "avg": avg,
+            "count": count
+        }

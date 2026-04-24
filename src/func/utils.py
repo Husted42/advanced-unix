@@ -48,3 +48,34 @@ def get_max(lst: list):
         if x > maximum:
             maximum = x
     return maximum
+    
+def filter_data(data, filter_col, filter_value, operator="==", key_col="cpr"):
+    result = {}
+
+    # If data is already a dict, iterate over its values
+    if isinstance(data, dict):
+        rows = data.values()
+    else:
+        rows = data
+
+    for row in rows:
+        val = row.get(filter_col)
+
+        if val is None:
+            continue
+
+        match = (
+            (operator == "==" and val == filter_value) or
+            (operator == "!=" and val != filter_value) or
+            (operator == ">" and val > filter_value) or
+            (operator == ">=" and val >= filter_value) or
+            (operator == "<" and val < filter_value) or
+            (operator == "<=" and val <= filter_value)
+        )
+
+        if match:
+            key = row.get(key_col)
+            if key is not None:
+                result[key] = row
+
+    return result
