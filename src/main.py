@@ -60,6 +60,46 @@ def main():
         data=filtered_data_male_has_kids,
         bin_size=10
     )
+    print(result_q3)
+
+    ########## ---------- Question 4 ---------- ##########
+    # At what age do women become mothers first time (max age, min age, average age)?
+    print("\n\nQustion 4 : ")
+
+    filtered_data_female = filter_data(
+        data,
+        filter_col="gender",
+        filter_value="Female",
+        operator="=="
+    )
+
+    result_q4 = analyzer.q2_value_summary(
+        filtered_data_female,
+        val_col="parenthood_start"
+    )
+
+    print(result_q4)
+
+
+    ########## ---------- Question 5 ---------- ##########
+    # Is the distribution of first-time motherhood age normal/sensible?
+    print("\n\nQustion 5 : ")
+
+    filtered_data_female_has_kids = filter_data(
+        filtered_data_female,
+        filter_col="parenthood_start",
+        filter_value=None,
+        operator="!="
+    )
+
+    result_q5 = analyzer.q1_value_distribution(
+        column_name="parenthood_start",
+        data=filtered_data_female_has_kids,
+        bin_size=10
+    )
+
+    print(result_q5)
+
 
 
 if __name__ == "__main__":
