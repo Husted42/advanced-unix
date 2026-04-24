@@ -1,22 +1,25 @@
 import json
 
 def parse_file_to_json(file_path):
+    # Not all people has children, so we initialize this attribute to be empty, otherwise it would just be missing for some and we cound't iterate through them
+    # Note that this happens each time we initialize a person 
     people = []
-    current_person = {}
+    current_person = {"children": []}
 
     with open(file_path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
 
-            # An empty line indicates the end of a person's record
+            # Checking if it is a new person based on empty lines
+            # If it is we append and create a new one
             if not line:
-                if current_person:
+                # cpr allows for doulbe line splits, st. two lines splits dones't append a person with only "{"children": []}"
+                if current_person and "cpr" in current_person:
                     people.append(current_person)
-                    current_person = {}
+                    current_person = {"children": []}
                 continue
 
-            # Skipping comments
-            if line[0] == "#": 
+            if line[0] == "#":
                 continue
 
             key, value = line.split(":", 1)
@@ -38,10 +41,10 @@ def parse_file_to_json(file_path):
             elif key == "Blood type":
                 current_person["blood_type"] = value
             elif key == "Children":
-                # We save the children as a list of names, splitting by whitespace
                 current_person["children"] = value.split()
 
-        if current_person:
+
+        if current_person and "cpr" in current_person:
             people.append(current_person)
 
     return people

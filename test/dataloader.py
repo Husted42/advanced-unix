@@ -1,8 +1,10 @@
 # We want to assume that the user is a the repository root when running the program. This will make refrencing files easier.
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from src.func.utils import set_working_directory_to_repo_root
+import sys, os
+def set_working_directory_to_repo_root(root="advanced-unix"):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    src_index = current_dir.find(root)
+    if src_index != -1:
+        sys.path.append(str(current_dir[:src_index + len(root)]))
 set_working_directory_to_repo_root()
 
 ########## ---------- Imports ---------- ##########
@@ -26,6 +28,7 @@ class TestDataLoader(unittest.TestCase):
 
         expected = [
                 {
+                    "children": [],
                     "cpr": "121215-2968",
                     "first_name": "Sanne",
                     "last_name": "Lind",
@@ -35,6 +38,7 @@ class TestDataLoader(unittest.TestCase):
                     "blood_type": "B+",
                 },
                 {
+                    "children": ["081154-2786", "120853-1151"],
                     "cpr": "230226-9781",
                     "first_name": "Anton",
                     "last_name": "Gade",
@@ -42,7 +46,6 @@ class TestDataLoader(unittest.TestCase):
                     "weight": 65,
                     "eye_color": "Black",
                     "blood_type": "A+",
-                    "children": ["081154-2786", "120853-1151"],
                 },
             ]
 
