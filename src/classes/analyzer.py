@@ -207,9 +207,12 @@ class Analyzer:
         total_people_has_grandparent = 0
         total = len(data)
 
+        #total runtime is O(n^2)
+        #O(n) where n is persons in data for loop
         for person in data:
             cpr = person.get('cpr')
 
+            #O(n*m), where n is persons in data, m is children for each parent
             grandparents = familyrelations.get_grandparents(cpr, data)
 
             if grandparents:
@@ -224,5 +227,90 @@ class Analyzer:
             "Amount of people who has a grandparent": total_people_has_grandparent,
             "Percentage of people who has a grandparent": percentage_has_grandparents
         }
+    
+    def q9_comparelists(self, list1, list2):
 
+        """
+        Helper function to find common elements in list
+        """
+
+        for value in list1:
+            if value in list2:
+                return True
+        return False
+
+    def q9_cousins(self, data):
+
+        #total runtime is O(n^2), as O(n^2) + O(n^2) ≈ O(n^2)
+
+        familyrelations = FamilyRelations(data)
+
+        parents_children = {}
+        grandparents_children = {}
+
+        #compute dicts of grandparents / parents for lookup
+
+        #O(n^2)
+        for person in data:
+            cpr = person.get('cpr')
+
+            parents_children[cpr] = familyrelations.get_parents(cpr, data)
+            grandparents_children[cpr] = familyrelations.get_grandparents(cpr, data)
+
+        cousins_pair = []
+
+        #compare every person to every other person
+        #O(n^2), where n is number of person in data
+        for i in range(len(data)):
+            for j in range(len(data)):
+
+                if i == j:
+                    continue
+
+                #find cpr to compare
+                cpr1 = data[i].get('cpr')
+                cpr2 = data[j].get('cpr')
+
+                #get their parents
+                parents1 = parents_children[cpr1]
+                parents2 = parents_children[cpr2]
+
+                #get their grandparents
+                grandparents1 = grandparents_children[cpr1]
+                grandparents2 = grandparents_children[cpr2]
+
+                #check if they share grandparents and/or parents
+                share_parent = self.q9_comparelists(parents1, parents2)
+                share_grandparent = self.q9_comparelists(grandparents1, grandparents2)
+
+                #check if they are parents
+                if share_grandparent and not share_parent:
+                    cousins_pair.append((cpr1, cpr2))
+
+        return cousins_pair
+        
+    def q9_cousins_calculations(self, data): 
+
+        cousins_pair = self.q9_cousins(data)
+
+        #find out how many people has a cousin
+        people_who_has_cousins = set()
+
+        for pair in cousins_pair:
+            people_who_has_cousins.add(pair[0])
+
+        #avoid zero divion
+        if len(people_who_has_cousins) == 0:
+            average_cousin_amount = 0
+
+        #average must be count of cousin pairs divided between people who has a cousins
+        else:
+            average_cousin_amount = len(cousins_pair) / len(people_who_has_cousins)
+
+        return {
+            "Number of people in the database who has a cousin": len(people_who_has_cousins),
+            "Average number of cousins, for people who has a cousin": average_cousin_amount,
+            }
+
+                
 

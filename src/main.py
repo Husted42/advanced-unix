@@ -131,5 +131,13 @@ def main():
     results_q8 = analyzer.q8_grandparents_count(data)
 
     print(results_q8)
+
+    ########## ---------- Question 9 ---------- ########## 
+
+    print("\n\nQustion 9 : ")
+
+    results_q9 = analyzer.q9_cousins_calculations(data)
+
+    print(results_q9)
 if __name__ == "__main__":
     main()
