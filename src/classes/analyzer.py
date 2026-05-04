@@ -11,6 +11,7 @@ set_working_directory_to_repo_root()
 from src.func.utils import get_max
 from src.func.utils import get_min
 
+from src.classes.modifier import Modifier
 
 class Analyzer:
     def __init__(self, data):
@@ -144,3 +145,49 @@ class Analyzer:
             "Percentages of women without children": women_percentages,
             "Total amount of people without children": total_percentages
         }
+
+
+    def q7_average_age_difference(self, data = None, pairs = None): 
+
+        # Check if external data was specified, if not use self.
+        if data == None: data = self.data
+
+        # Allow for passing a dict
+        if isinstance(data, dict):
+            data = data.values()
+
+
+        total_pairs = len(pairs)
+        total_difference = 0
+
+        #runtime O(n), where n pair of parents
+        for parent in pairs:
+            parent1 = parent[0]
+            parent2 = parent[1]
+
+            #runtime O(m), where m is people in parents
+            for person in data:
+
+                if person.get('cpr') == parent1:
+                    age1 = person.get('age')
+
+                if person.get('cpr') == parent2:
+                    age2 = person.get('age')
+
+            if age1 is not None and age2 is not None:
+                age_difference = abs(age1 - age2)
+
+                total_difference += age_difference
+                         
+            
+        if total_pairs == 0:
+            average_difference = 0
+        else: 
+            average_difference = total_difference / total_pairs
+
+        return {
+            "Average age differnece between parents is": average_difference
+        }
+
+
+

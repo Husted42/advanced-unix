@@ -9,6 +9,8 @@ from classes import modifier
 from src.func.dataloader import parse_file_to_json
 from src.classes.analyzer import Analyzer
 from src.classes.modifier import Modifier
+from src.classes.familyrelations import FamilyRelations
+
 from src.func.utils import filter_data
 
 
@@ -17,6 +19,7 @@ def main():
     data = parse_file_to_json("data/people.db")
     modifier = Modifier(data)
     analyzer = Analyzer(data)
+    familyrelations = FamilyRelations(data)
 
     ########## ---------- Question 1 ---------- ##########
     # What is the age and gender distribution of the people in the database?
@@ -107,6 +110,16 @@ def main():
     result_q6 = analyzer.q6_parenthood_distribution(data)
 
     print(result_q6)
+
+    ########## ---------- Question 7 ---------- ##########
+    print("\n\nQustion 7 : ")
+    
+
+    pairs = familyrelations.get_parents_pair(data)
+
+    results_q7 = analyzer.q7_average_age_difference(data, pairs)
+
+    print(results_q7)
 
 if __name__ == "__main__":
     main()
