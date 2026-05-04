@@ -46,7 +46,7 @@ def test_q7_average_age_diffference():
     pairs = familyrelations.get_parents_pair(mock_dataset)
 
     expected = {
-        'Average age differnece between parents is': 1.0}
+        'Average age difference between parents is': 1.0}
 
     results = analyzer.q7_average_age_difference(mock_dataset, pairs)
 
@@ -55,7 +55,7 @@ def test_q7_average_age_diffference():
 def test_q7_division_by_zero():
 
     """
-    A test to verify that function correctly avoid zero dicision, when no pair are present
+    A test to verify that function correctly avoid zero division, when no pair are present
     """
 
     mock_dataset = [
@@ -87,10 +87,10 @@ def test_q7_division_by_zero():
     pairs = familyrelations.get_parents_pair(mock_dataset)
 
     expected = {
-        'Average age differnece between parents is': 0.0}
+        'Average age difference between parents is': 0.0}
 
     results = analyzer.q7_average_age_difference(mock_dataset, pairs)
-
+    print(results)
     assert results == expected
 
 

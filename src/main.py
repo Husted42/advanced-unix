@@ -105,6 +105,7 @@ def main():
 
 
     ########## ---------- Question 6 ---------- ##########
+    # How many men and women do not have children (in percent)?
 
     print("\n\nQustion 6 : ")
     result_q6 = analyzer.q6_parenthood_distribution(data)
@@ -112,6 +113,7 @@ def main():
     print(result_q6)
 
     ########## ---------- Question 7 ---------- ##########
+    # What is the average age difference between the parents (with a child in common obviously)?
     print("\n\nQustion 7 : ")
     
 
@@ -121,5 +123,13 @@ def main():
 
     print(results_q7)
 
+    ########## ---------- Question 8 ---------- ##########
+    # How many people has at least one grandparent that is still alive? A person is living if he/she is in the database. State the number both in percent and as a real number.
+
+    print("\n\nQustion 8 : ")
+
+    results_q8 = analyzer.q8_grandparents_count(data)
+
+    print(results_q8)
 if __name__ == "__main__":
     main()

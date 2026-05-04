@@ -12,11 +12,13 @@ from src.func.utils import get_max
 from src.func.utils import get_min
 
 from src.classes.modifier import Modifier
+from src.classes.familyrelations import FamilyRelations
+
 
 class Analyzer:
     def __init__(self, data):
         self.data = data
-
+        
     def q1_value_distribution(self, column_name='age', data = None, bin_size=10):
         age_bins = {}
 
@@ -186,8 +188,41 @@ class Analyzer:
             average_difference = total_difference / total_pairs
 
         return {
-            "Average age differnece between parents is": average_difference
+            "Average age difference between parents is": average_difference
         }
 
+
+
+    def q8_grandparents_count(self, data):
+
+        # Check if external data was specified, if not use self.
+        if data == None: data = self.data
+
+        # Allow for passing a dict
+        if isinstance(data, dict):
+            data = data.values()  
+
+        familyrelations = FamilyRelations(data)
+
+        total_people_has_grandparent = 0
+        total = len(data)
+
+        for person in data:
+            cpr = person.get('cpr')
+
+            grandparents = familyrelations.get_grandparents(cpr, data)
+
+            if grandparents:
+                total_people_has_grandparent += 1
+
+        if total == 0.0:
+            percentage_has_grandparents = 0.0
+        else:
+            percentage_has_grandparents = (total_people_has_grandparent / total)  * 100   
+        
+        return {
+            "Amount of people who has a grandparent": total_people_has_grandparent,
+            "Percentage of people who has a grandparent": percentage_has_grandparents
+        }
 
 

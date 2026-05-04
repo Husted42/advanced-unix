@@ -39,7 +39,7 @@ class FamilyRelations:
             parent_cpr = person.get('cpr')
 
             #O(m), where m is children for each parent
-            for child_cpr in person['children']:
+            for child_cpr in person.get('children', []):
                 if child_cpr not in children_parents:
                     children_parents[child_cpr] = []
 
@@ -54,7 +54,7 @@ class FamilyRelations:
 
         child_parents = self.build_parents_children_lookup(data)
 
-        return child_parents.get(child_cpr)
+        return child_parents.get(child_cpr, [])
     
     def get_parents_pair(self, data):
         """
@@ -78,4 +78,25 @@ class FamilyRelations:
                     pairs.append(pair)
 
         return pairs
+    
+    def get_grandparents(self, child_cpr, data):
+
+        "A function to get a child grandparents"
+
+        parents = self.get_parents(child_cpr, data)
+
+        grandparents = []
+
+        for parent in parents:
+            parent_of_parent = self.get_parents(parent, data)
+
+            for grandparent in parent_of_parent:
+                grandparents.append(grandparent)
+
+        return grandparents
+
+
+
+
+
     
