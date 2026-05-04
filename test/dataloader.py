@@ -1,5 +1,6 @@
 # We want to assume that the user is a the repository root when running the program. This will make refrencing files easier.
 import sys, os
+
 def set_working_directory_to_repo_root(root="advanced-unix"):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     src_index = current_dir.find(root)

@@ -86,3 +86,61 @@ class Analyzer:
             "avg": avg,
             "count": count
         }
+    
+    def q6_parenthood_distribution(self, data = None):
+
+        # Check if external data was specified, if not use self.
+        if data == None: data = self.data
+
+        # Allow for passing a dict
+        if isinstance(data, dict):
+            data = data.values()
+
+        
+        men_total = 0
+        women_total = 0
+
+        women_no_children = 0
+        men_no_children = 0
+
+        #O(n), where n is number of persons in data
+        for person in data:
+            #gather cpr to differentiate between women/men
+            cpr = person['cpr']
+            last_degit = cpr[-1]
+
+            #get is runtime O(1) on average
+            has_children = person.get('children')
+            
+            #count total and if has no children for men and women
+            if int(last_degit )% 2 == 1:
+                men_total += 1
+
+                if not has_children:
+                    men_no_children += 1
+
+            else:
+                women_total += 1
+
+                if not has_children:
+                    women_no_children += 1
+        
+        men_percentages = 0
+        women_percentages = 0
+        total_percentages = 0
+
+        #Check to avoid zer division, otherwise calculate percentage
+        if men_total > 0:                       
+            men_percentages = (men_no_children / men_total) * 100 
+
+        if women_total > 0:                      
+            women_percentages = (women_no_children / women_total) * 100
+
+        if  women_total or men_total > 0:
+            total_percentages = ((women_no_children + men_no_children) / (men_total + women_total )) * 100
+        
+        return {
+            "Percentages of men without children": men_percentages,
+            "Percentages of women without children": women_percentages,
+            "Total amount of people without children": total_percentages
+        }

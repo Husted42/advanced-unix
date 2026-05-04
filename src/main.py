@@ -101,6 +101,12 @@ def main():
     print(result_q5)
 
 
+    ########## ---------- Question 6 ---------- ##########
+
+    print("\n\nQustion 6 : ")
+    result_q6 = analyzer.q6_parenthood_distribution(data)
+
+    print(result_q6)
 
 if __name__ == "__main__":
     main()
