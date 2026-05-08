@@ -154,3 +154,4 @@ def test_sibling():
     results = analyzer.q9_cousins_calculations(mock_dataset)
 
     assert results == expected
+

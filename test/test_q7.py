@@ -86,6 +86,7 @@ def test_q7_division_by_zero():
 
     pairs = familyrelations.get_parents_pair(mock_dataset)
 
+    print(pairs)
     expected = {
         'Average age difference between parents is': 0.0}
 
