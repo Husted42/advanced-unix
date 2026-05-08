@@ -18,6 +18,7 @@ from src.classes.familyrelations import FamilyRelations
 class Analyzer:
     def __init__(self, data):
         self.data = data
+        self.familyrelations = FamilyRelations(data)
         
     def q1_value_distribution(self, column_name='age', data = None, bin_size=10):
         age_bins = {}
@@ -202,18 +203,16 @@ class Analyzer:
         if isinstance(data, dict):
             data = data.values()  
 
-        familyrelations = FamilyRelations(data)
-
         total_people_has_grandparent = 0
         total = len(data)
 
-        #total runtime is O(n^2)
+        
         #O(n) where n is persons in data for loop
         for person in data:
             cpr = person.get('cpr')
 
-            #O(n*m), where n is persons in data, m is children for each parent
-            grandparents = familyrelations.get_grandparents(cpr, data)
+            #O(1)
+            grandparents = self.familyrelations.get_grandparents(cpr, data)
 
             if grandparents:
                 total_people_has_grandparent += 1
@@ -241,21 +240,26 @@ class Analyzer:
 
     def q9_cousins(self, data):
 
+        # Check if external data was specified, if not use self.
+        if data == None: data = self.data
+
+        # Allow for passing a dict
+        if isinstance(data, dict):
+            data = data.values()  
+
         #total runtime is O(n^2), as O(n^2) + O(n^2) ≈ O(n^2)
 
-        familyrelations = FamilyRelations(data)
-
-        parents_children = {}
-        grandparents_children = {}
+        parents_lookup = {}
+        grandparents_lookup = {}
 
         #compute dicts of grandparents / parents for lookup
 
-        #O(n^2)
+        #O(n)
         for person in data:
             cpr = person.get('cpr')
 
-            parents_children[cpr] = familyrelations.get_parents(cpr, data)
-            grandparents_children[cpr] = familyrelations.get_grandparents(cpr, data)
+            parents_lookup[cpr] = self.familyrelations.get_parents(cpr, data)
+            grandparents_lookup[cpr] = self.familyrelations.get_grandparents(cpr, data)
 
         cousins_pair = []
 
@@ -264,6 +268,7 @@ class Analyzer:
         for i in range(len(data)):
             for j in range(len(data)):
 
+                #avoids making a person its own cousin
                 if i == j:
                     continue
 
@@ -272,14 +277,15 @@ class Analyzer:
                 cpr2 = data[j].get('cpr')
 
                 #get their parents
-                parents1 = parents_children[cpr1]
-                parents2 = parents_children[cpr2]
+                parents1 = parents_lookup[cpr1]
+                parents2 = parents_lookup[cpr2]
 
                 #get their grandparents
-                grandparents1 = grandparents_children[cpr1]
-                grandparents2 = grandparents_children[cpr2]
+                grandparents1 = grandparents_lookup[cpr1]
+                grandparents2 = grandparents_lookup[cpr2]
 
-                #check if they share grandparents and/or parents
+                #check if they share grandparents and/or parents,
+                # O(1), constant time
                 share_parent = self.q9_comparelists(parents1, parents2)
                 share_grandparent = self.q9_comparelists(grandparents1, grandparents2)
 
@@ -289,7 +295,14 @@ class Analyzer:
 
         return cousins_pair
         
-    def q9_cousins_calculations(self, data): 
+    def q9_cousins_calculations(self, data):
+
+        # Check if external data was specified, if not use self.
+        if data == None: data = self.data
+
+        # Allow for passing a dict
+        if isinstance(data, dict):
+            data = data.values()   
 
         cousins_pair = self.q9_cousins(data)
 
@@ -311,6 +324,138 @@ class Analyzer:
             "Number of people in the database who has a cousin": len(people_who_has_cousins),
             "Average number of cousins, for people who has a cousin": average_cousin_amount,
             }
+    
+    def q10_get_precise_age(self, cpr):
+        
+        day = int(cpr[0:2])
+        month = int(cpr[2:4])
+        year = int(cpr[4:6])
+
+        #We assume that everyone is born before 2000s
+        year = 1900 + year
+
+        return (year, month, day)
+
+
+    def q10_firstborn_gender(self, data):
+
+        # Check if external data was specified, if not use self.
+        if data == None: data = self.data
+
+        # Allow for passing a dict
+        if isinstance(data, dict):
+            data = data.values()  
+
+        eldest_daugther = 0
+        eldest_son = 0 
+        eldest_children = 0
+
+        #get children of every person
+        # O(n), where n is length of data
+        for person in data:
+            children = person.get('children', [])
+
+            if not children:
+                continue
+
+            eldest_child = None
+            eldest_age = (-1,-1,-1)
+
+            #check age of siblings, find eldest
+            #O(m), where m is length of children. Could argue for constant time.
+            for child in children:
+      
+                #get age tuble to compare    
+                child_age = self.q10_get_precise_age(child)
+                
+                #find eldest
+                if child_age > eldest_age:
+                    eldest_child = child_age
+                    eldest_child = child
+
+                #find gender
+                last_digit = int(eldest_child[-1])
+                
+                if last_digit % 2 == 0:
+                    eldest_daugther += 1
+                else: 
+                    eldest_son += 1
+
+                eldest_children += 1
+
+        #calculate percentages
+        if eldest_children == 0:
+            percentage_eldest_daugters = 0
+            percentage_eldest_sons = 0
+        else:
+            percentage_eldest_daugters = (eldest_daugther / eldest_children) * 100 
+            percentage_eldest_sons = (eldest_son / eldest_children) * 100 
+        
+        return {'The percentage of eldest children who are daugthers is': percentage_eldest_daugters,
+                'The percentage of eldest children who are sons is': percentage_eldest_sons}
+
+    
+    def q11_has_child_with_more_than_one(self, data):
+
+        # Check if external data was specified, if not use self.
+        if data == None: data = self.data
+
+        # Allow for passing a dict
+        if isinstance(data, dict):
+            data = data.values()
+
+        #this list will only contain unique pairs
+        pairs = self.familyrelations.get_parents_pair(data)
+        
+
+        parent_to_partners = {}
+
+        #flattend pair
+        ##O(n), where n is length of pairs
+        for pair in pairs:
+            parent1 = pair[0]
+            parent2 = pair[1]
+
+            #add parent to dict as key
+            if parent1 not in parent_to_partners:
+                parent_to_partners[parent1] = []
+
+            if parent2 not in parent_to_partners:
+                parent_to_partners[parent2] = []
+            
+            #add partner to parent as value
+            if parent2 not in parent_to_partners[parent1]:
+                parent_to_partners[parent1].append(parent2)
+            
+            if parent1 not in parent_to_partners[parent2]:
+                parent_to_partners[parent2].append(parent1)
+            
+        more_than_one_partner = 0
+        
+        #check for each parent, if more than one partner
+        #O(n*2), where n is length of pairs
+        for parent in parent_to_partners:
+            if len(parent_to_partners[parent]) > 1:
+                more_than_one_partner +=1 
+
+        total_parents = len(parent_to_partners) 
+
+        if total_parents == 0:
+            percentage_has_child_with_more_than_one = 0
+        else:
+            percentage_has_child_with_more_than_one = (more_than_one_partner / total_parents) * 100
+
+
+        return {'Percentage of parents who have a child with more than one': percentage_has_child_with_more_than_one}
+    
+    def what_is_tallness(self, data):
+        
+    def q12_do_tall_people_marry_each_other(self, data):
+
+
+
+        
+
 
     def q14_parent_bmi_couple_distribution(self, data=None):
         """

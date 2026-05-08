@@ -133,7 +133,7 @@ def main():
     print(results_q8)
 
     ########## ---------- Question 9 ---------- ########## 
-
+    # How many has at least one cousin in the data set? What is the average number of cousins based on those who have cousins?
     print("\n\nQustion 9 : ")
 
     results_q9 = analyzer.q9_cousins_calculations(data)
@@ -234,6 +234,22 @@ def main():
             break
         print(child)
 
+
+    ########## ---------- Question 10 ---------- ########## 
+    print("\n\nQustion 10 : ")
+
+    results_q10 = analyzer.q10_firstborn_gender(data)
+
+    print(results_q10)
+
+    ########## ---------- Question 11 ---------- ########## 
+    print("\n\nQustion 11 : ")
+
+    results_q11 = analyzer.q11_has_child_with_more_than_one(data)
+
+    print(results_q11)
+
+    
 if __name__ == "__main__":
     main()
 

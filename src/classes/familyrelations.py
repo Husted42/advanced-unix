@@ -19,6 +19,7 @@ This class is for functions to make lookup between familiy relationsship easier
 class FamilyRelations:
     def __init__(self, data):
         self.data = data
+        self.child_to_parents = self.build_parents_children_lookup(data)
 
     def build_parents_children_lookup(self, data):
 
@@ -32,7 +33,7 @@ class FamilyRelations:
         Create dict for easy lookup of a child's parents
 
         """
-        children_parents = {}
+        child_to_parents = {}
 
         #O(n), where n is persons in data
         for person in self.data:
@@ -40,21 +41,18 @@ class FamilyRelations:
 
             #O(m), where m is children for each parent
             for child_cpr in person.get('children', []):
-                if child_cpr not in children_parents:
-                    children_parents[child_cpr] = []
+                if child_cpr not in child_to_parents:
+                    child_to_parents[child_cpr] = []
 
-                children_parents[child_cpr].append(parent_cpr)
+                child_to_parents[child_cpr].append(parent_cpr)
 
-        return children_parents
+        return child_to_parents
     
     def get_parents(self, child_cpr, data):
         """
         A function to look-up parents of a child 
         """
-
-        child_parents = self.build_parents_children_lookup(data)
-
-        return child_parents.get(child_cpr, [])
+        return self.child_to_parents.get(child_cpr, [])
     
     def get_parents_pair(self, data):
         """
@@ -62,11 +60,9 @@ class FamilyRelations:
 
         """
 
-        child_parents = self.build_parents_children_lookup(data)
-
         pairs = []
-        for child in child_parents:
-            parents = child_parents[child]
+        for child in self.child_to_parents:
+            parents = self.child_to_parents[child]
 
             #check in case a child only has a single parent
             if len(parents) == 2:
@@ -87,9 +83,11 @@ class FamilyRelations:
 
         grandparents = []
 
+        #O(2), get parents for each child parent 
         for parent in parents:
             parent_of_parent = self.get_parents(parent, data)
 
+            #O(4), save to list
             for grandparent in parent_of_parent:
                 grandparents.append(grandparent)
 
