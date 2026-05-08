@@ -95,7 +95,32 @@ class FamilyRelations:
 
         return grandparents
 
+    def get_father(self, child_cpr, data=None):
+        """
+        Returns the father CPR of a child.
 
+        Assumes father is the male parent.
+        Returns None if no father is found.
+        """
+
+        if data is None:
+            data = self.data
+
+        if isinstance(data, dict):
+            people = data
+        else:
+            people = {person.get("cpr"): person for person in data}   # O(n)
+
+        parents = self.get_parents(child_cpr, data)                   # O(n)
+
+        # O(p), where p is number of parents (typically <= 2)
+        for parent_cpr in parents:
+            parent = people.get(parent_cpr)
+
+            if parent and parent.get("gender") == "Male":
+                return parent_cpr
+
+        return None
 
 
 

@@ -57,4 +57,36 @@ class Modifier:
             else: 
                 person['parenthood_start'] = None
 
+    def q14_calculate_bmi(self):
+        for person in self.data:
+            height = person.get("height")
+            weight = person.get("weight")
+
+            if height is None or weight is None:
+                person["bmi"] = None
+                continue
+
+            # Convert to meters
+            height_m = height / 100
+
+            if height_m <= 0:
+                person["bmi"] = None
+                continue
+
+            person["bmi"] = weight / (height_m ** 2)
+
+
+    def q14_add_bmi_category(self):
+        for person in self.data:
+            bmi = person.get("bmi")
+
+            if bmi is None:
+                person["bmi_category"] = None
+            elif bmi < 18.5:
+                person["bmi_category"] = "Slim"
+            elif bmi < 25:
+                person["bmi_category"] = "Normal"
+            else:
+                person["bmi_category"] = "Fat"
+
   
