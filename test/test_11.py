@@ -165,6 +165,7 @@ def no_valid_parents_pair():
             'children' : ['1117', '1118']
         },
         ]
+    
     analyzer = Analyzer(mockdata)
 
     expected = {'Percentage of parents who have a child with more than one': approx(0.0)}

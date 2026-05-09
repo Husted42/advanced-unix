@@ -140,6 +140,101 @@ def main():
 
     print(results_q9)
 
+    ########## ---------- Question 14 ---------- ##########
+    '''
+        Do fat people marry?
+    '''
+    print("\n\nQustion 14 : ")
+    modifier = Modifier(data)
+    modifier.q14_calculate_bmi()
+    modifier.q14_add_bmi_category()
+
+    analyzer = Analyzer(data)
+    result = analyzer.q14_parent_bmi_couple_distribution()
+
+    print("\n########## Question 14 Results ##########\n")
+
+    print(f"Total parent pairs: {result['Total parent pairs']}\n")
+
+    print("Couple BMI distribution:")
+    for couple_type in result["Couple counts"]:
+        count = result["Couple counts"][couple_type]
+        percentage = result["Couple percentages"][couple_type]
+        print(f"{couple_type}: {count} pairs ({percentage:.2f}%)")
+
+    ########## ---------- Question 15 ---------- ##########
+    '''
+    Using the knowledge of blood group type inheritance, 
+    are there any children in the database where you can safely say that at least one of the parents are not the real parent. 
+    If such children exists, make a list of them. In the report you must discuss how you determine that the parent(s) of the child are not the "true" parents.
+    ''' 
+    print("\n\nQustion 15 : ")
+    print("Impossible combination of blood types between parents and children: ")
+    results_q15 = analyzer.q15_impossible_parent_child_bloodtypes()
+    print("len(results_q15):", len(results_q15))
+    print(dict(list(results_q15.items())[:5]))
+
+    ########## ---------- Question 16 ---------- ##########
+    '''
+    Make a list of fathers who can donate blood to their sons.
+    '''
+    print("\n\nQustion 16 : ")
+    father_son_donations = analyzer.q16_fathers_can_donate_to_children()
+    number_of_pairs = len(father_son_donations)
+
+    number_of_fathers = len({
+        pair["father_cpr"]
+        for pair in father_son_donations.values()
+    })
+
+    number_of_sons = len({
+        pair["son_cpr"]
+        for pair in father_son_donations.values()
+    })
+
+    print("Number of father-son pairs:", number_of_pairs)
+    print("Number of fathers:", number_of_fathers)
+    print("Number of sons:", number_of_sons)
+
+    # Print a few examples of father-son pairs
+    print("Examples of father-son pairs:")
+    for i, pair in enumerate(father_son_donations.values()):
+        if i >= 5:  # Print only the first 5 pairs
+            break
+        print(pair)
+
+    ########## ---------- Question 17 ---------- ##########
+    '''
+    Make a list of children where at least one grandparent can donate blood to them.
+    '''
+    print("\n\nQuestion 17 : ")
+
+    grandparent_child_donations = analyzer.q17_grandparents_can_donate_to_children()
+
+    number_of_children = len(grandparent_child_donations)
+
+    number_of_grandparents = len({
+        grandparent["grandparent_cpr"]
+        for child in grandparent_child_donations.values()
+        for grandparent in child["grandparents_who_can_donate"]
+    })
+
+    number_of_donation_relations = sum(
+        len(child["grandparents_who_can_donate"])
+        for child in grandparent_child_donations.values()
+    )
+
+    print("Number of children with at least one grandparent donor:", number_of_children)
+    print("Number of unique grandparents who can donate:", number_of_grandparents)
+    print("Number of grandparent-child donation relations:", number_of_donation_relations)
+
+    print("Examples:")
+    for i, child in enumerate(grandparent_child_donations.values()):
+        if i >= 5:
+            break
+        print(child)
+
+
     ########## ---------- Question 10 ---------- ########## 
     print("\n\nQustion 10 : ")
 
@@ -159,3 +254,4 @@ def main():
     
 if __name__ == "__main__":
     main()
+

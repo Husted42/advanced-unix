@@ -460,13 +460,371 @@ class Analyzer:
 
 
         return {'Percentage of parents who have a child with more than one': percentage_has_child_with_more_than_one}
-
-
+    
+ #   def what_is_tallness(self, data):
+ #   def q12_do_tall_people_marry_each_other(self, data):
 
 
 
         
 
 
-                
+    def q14_parent_bmi_couple_distribution(self, data=None):
+        """
+        Counts parent-pair BMI combinations:
+        Fat/Fat, Fat/Normal, Fat/Slim, Normal/Normal, Normal/Slim, Slim/Slim.
+        """
 
+        if data is None:
+            data = self.data
+
+        if isinstance(data, dict):
+            people = data
+            people_list = list(data.values())
+        else:
+            people_list = data
+            people = {person.get("cpr"): person for person in data}
+
+        familyrelations = FamilyRelations(people_list)
+
+        couple_counts = {
+            "Fat/Fat": 0,
+            "Fat/Normal": 0,
+            "Fat/Slim": 0,
+            "Normal/Normal": 0,
+            "Normal/Slim": 0,
+            "Slim/Slim": 0
+        }
+
+        seen_parent_pairs = set()
+
+        for child in people_list:
+            child_cpr = child.get("cpr")
+            parents = familyrelations.get_parents(child_cpr, people_list)
+
+            if len(parents) != 2:
+                continue
+
+            parent_pair = tuple(sorted(parents))
+
+            if parent_pair in seen_parent_pairs:
+                continue
+
+            seen_parent_pairs.add(parent_pair)
+
+            parent1 = people.get(parents[0])
+            parent2 = people.get(parents[1])
+
+            if parent1 is None or parent2 is None:
+                continue
+
+            bmi1 = parent1.get("bmi_category")
+            bmi2 = parent2.get("bmi_category")
+
+            if bmi1 is None or bmi2 is None:
+                continue
+
+            # Sort so Fat/Normal and Normal/Fat are counted together
+            pair = sorted([bmi1, bmi2])
+
+            if pair == ["Fat", "Fat"]:
+                couple_counts["Fat/Fat"] += 1
+            elif pair == ["Fat", "Normal"]:
+                couple_counts["Fat/Normal"] += 1
+            elif pair == ["Fat", "Slim"]:
+                couple_counts["Fat/Slim"] += 1
+            elif pair == ["Normal", "Normal"]:
+                couple_counts["Normal/Normal"] += 1
+            elif pair == ["Normal", "Slim"]:
+                couple_counts["Normal/Slim"] += 1
+            elif pair == ["Slim", "Slim"]:
+                couple_counts["Slim/Slim"] += 1
+
+        total_parent_pairs = sum(couple_counts.values())
+
+        couple_percentages = {}
+
+        for couple_type, count in couple_counts.items():
+            if total_parent_pairs == 0:
+                couple_percentages[couple_type] = 0
+            else:
+                couple_percentages[couple_type] = (count / total_parent_pairs) * 100
+
+        return {
+            "Total parent pairs": total_parent_pairs,
+            "Couple counts": couple_counts,
+            "Couple percentages": couple_percentages
+        }
+
+    def q15_abo(self, blood_type):
+        """Remove Rh factor: A+ -> A, O- -> O."""
+        # O(1), since blood type strings have constant length
+        if blood_type is None:
+            return None
+        return blood_type.replace("+", "").replace("-", "")
+
+
+    def q15_can_parents_have_child(self, child_blood, parent1_blood, parent2_blood):
+        """
+        Checks ABO inheritance using the Wikipedia phenotype table.
+        Ignores Rh factor (+/-).
+        """
+        # O(1), fixed number of blood type checks
+
+        child = self.q15_abo(child_blood)        
+        p1 = self.q15_abo(parent1_blood)         
+        p2 = self.q15_abo(parent2_blood)         
+
+        parent_pair = frozenset([p1, p2])        
+
+        allowed_parent_pairs = {
+            "O": {
+                frozenset(["O", "O"]),
+                frozenset(["O", "A"]),
+                frozenset(["O", "B"]),
+                frozenset(["A", "A"]),
+                frozenset(["A", "B"]),
+                frozenset(["B", "B"]),
+            },
+            "A": {
+                frozenset(["O", "A"]),
+                frozenset(["O", "AB"]),
+                frozenset(["A", "A"]),
+                frozenset(["A", "B"]),
+                frozenset(["A", "AB"]),
+                frozenset(["B", "AB"]),
+                frozenset(["AB", "AB"]),
+            },
+            "B": {
+                frozenset(["O", "B"]),
+                frozenset(["O", "AB"]),
+                frozenset(["A", "B"]),
+                frozenset(["A", "AB"]),
+                frozenset(["B", "B"]),
+                frozenset(["B", "AB"]),
+                frozenset(["AB", "AB"]),
+            },
+            "AB": {
+                frozenset(["A", "B"]),
+                frozenset(["A", "AB"]),
+                frozenset(["B", "AB"]),
+                frozenset(["AB", "AB"]),
+            }
+        }
+
+        return parent_pair in allowed_parent_pairs[child]   # O(1)
+
+
+    def q15_impossible_parent_child_bloodtypes(self, data=None):
+        """
+        Go through everyone in the database and check if their parents
+        are a possible blood type match.
+
+        Returns a dict of children where at least one listed parent
+        cannot be the true biological parent.
+        """
+
+        if data is None:
+            data = self.data
+
+        # O(n), where n is the number of people
+        if isinstance(data, dict):
+            people = data
+            people_list = data.values()
+        else:
+            people_list = data
+            people = {person.get("cpr"): person for person in data}   
+
+        familyrelations = FamilyRelations(people_list)                
+
+        impossible_cases = {}
+
+        # O(n), loops through every person once
+        for child in people_list:
+            child_cpr = child.get("cpr")                              
+            child_blood = child.get("blood_type")                     
+
+            parents = familyrelations.get_parents(child_cpr, people_list) # O(n)
+
+            # O(1)
+            if len(parents) != 2:
+                continue
+
+            parent1 = people.get(parents[0])                           
+            parent2 = people.get(parents[1])                           
+
+            if parent1 is None or parent2 is None:                     
+                continue
+
+            parent1_blood = parent1.get("blood_type")                  
+            parent2_blood = parent2.get("blood_type")                  
+
+            if not child_blood or not parent1_blood or not parent2_blood: 
+                continue
+
+            possible = self.q15_can_parents_have_child(
+                child_blood,
+                parent1_blood,
+                parent2_blood
+            )                                                          
+
+            if not possible:                                           
+                impossible_cases[child_cpr] = {
+                    "child_blood_type": child_blood,
+                    "parent1_cpr": parent1.get("cpr"),
+                    "parent1_blood_type": parent1_blood,
+                    "parent2_cpr": parent2.get("cpr"),
+                    "parent2_blood_type": parent2_blood,
+                }                                                      
+
+        return impossible_cases
+
+
+    def q16_can_donate_blood(self, person1, person2):
+        # O(1), because the compatibility table has a fixed size
+
+        compatibility = {
+            "O-": ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"],
+            "O+": ["O+", "A+", "B+", "AB+"],
+            "A-": ["A-", "A+", "AB-", "AB+"],
+            "A+": ["A+", "AB+"],
+            "B-": ["B-", "B+", "AB-", "AB+"],
+            "B+": ["B+", "AB+"],
+            "AB-": ["AB-", "AB+"],
+            "AB+": ["AB+"]
+        }
+
+        blood1 = person1.get('blood_type')                             
+        blood2 = person2.get('blood_type')                             
+
+        if not blood1 or not blood2:                                    
+            return {
+                "person1_can_donate_to_person2": False,
+                "person2_can_donate_to_person1": False,
+                "error": "Missing blood type information"
+            }
+
+        can_1_to_2 = blood2 in compatibility.get(blood1, [])            
+        can_2_to_1 = blood1 in compatibility.get(blood2, [])            
+
+        return {
+            "person1_can_donate_to_person2": can_1_to_2,
+            "person2_can_donate_to_person1": can_2_to_1
+        }
+
+    def q16_fathers_can_donate_to_children(self, data=None):
+        """
+        Checks whether each father can donate blood to each of his children.
+
+        Returns a dict containing:
+        - father CPR
+        - father blood type
+        - child/son CPR
+        - child/son blood type
+        - whether donation is possible
+        """
+
+        if data is None:
+            data = self.data
+
+        if isinstance(data, dict):
+            people = data
+            people_list = list(data.values())
+        else:
+            people_list = data
+            people = {person.get("cpr"): person for person in data}
+
+        familyrelations = FamilyRelations(people_list)
+
+        results = {}
+
+        # O(n), where n is number of people
+        for child in people_list:
+            child_cpr = child.get("cpr")
+            child_blood = child.get("blood_type")
+
+            if not child_cpr or not child_blood:
+                continue
+
+            father_cpr = familyrelations.get_father(child_cpr, people_list)
+
+            if father_cpr is None:
+                continue
+
+            father = people.get(father_cpr)
+
+            if father is None:
+                continue
+
+            father_blood = father.get("blood_type")
+
+            if not father_blood:
+                continue
+
+            donation_result = self.q16_can_donate_blood(father, child)
+
+            results[child_cpr] = {
+                "father_cpr": father_cpr,
+                "father_blood_type": father_blood,
+                "son_cpr": child_cpr,
+                "son_blood_type": child_blood,
+                "father_can_donate_to_son": donation_result["person1_can_donate_to_person2"]
+            }
+
+        return results
+    
+
+    def q17_grandparents_can_donate_to_children(self, data=None):
+        if data is None:
+            data = self.data
+
+        if isinstance(data, dict):
+            people = data
+            people_list = list(data.values())
+        else:
+            people_list = data
+            people = {person.get("cpr"): person for person in data}
+
+        familyrelations = FamilyRelations(people_list)
+
+        results = {}
+
+        # O(n), where n is number of people
+        for child in people_list:
+            child_cpr = child.get("cpr")
+            child_blood = child.get("blood_type")
+
+            if not child_cpr or not child_blood:
+                continue
+
+            grandparents = familyrelations.get_grandparents(child_cpr, people_list)
+
+            grandparents_who_can_donate = []
+
+            for grandparent_cpr in grandparents:
+                grandparent = people.get(grandparent_cpr)
+
+                if grandparent is None:
+                    continue
+
+                grandparent_blood = grandparent.get("blood_type")
+
+                if not grandparent_blood:
+                    continue
+
+                donation_result = self.q16_can_donate_blood(grandparent, child)
+
+                if donation_result["person1_can_donate_to_person2"]:
+                    grandparents_who_can_donate.append({
+                        "grandparent_cpr": grandparent_cpr,
+                        "grandparent_blood_type": grandparent_blood
+                    })
+
+            if grandparents_who_can_donate:
+                results[child_cpr] = {
+                    "child_cpr": child_cpr,
+                    "child_blood_type": child_blood,
+                    "grandparents_who_can_donate": grandparents_who_can_donate
+                }
+
+        return results
