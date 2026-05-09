@@ -75,4 +75,102 @@ def test_q11_child_has_more_than_two_partner():
 
     assert expected == results
 
+def test_q11_no_parents_have_children_with_more_than_one():
+         
+    """
+    A test to verify correct results
+    """
+
+    mockdata = [
+        {
+            'cpr': '1234',
+            'children' : ['1111', '1112']
+        },
+        {
+            'cpr': '4321',
+            'children' : ['1111', '1112']
+        },
+        {
+            'cpr': '5678',
+            'children' : ['2222', '2223']
+        },
+        {
+            'cpr': '8765',
+            'children' : ['2222', '2223']
+        },
+        ]
+
+    analyzer = Analyzer(mockdata)
+
+    expected = {'Percentage of parents who have a child with more than one': approx((0.0))}
+
+    results = analyzer.q11_has_child_with_more_than_one(mockdata)
+
+    assert expected == results
+
+def test_q11_two_parents_have_children_with_more_than_one():
+         
+    """
+    A test to verify correct results
+    """
+
+    mockdata = [
+        {
+            'cpr': '1234',
+            'children' : ['1111', '1112']
+        },
+        {
+            'cpr': '4321',
+            'children' : ['1111', '1113']
+        },
+        {
+            'cpr': '5678',
+            'children' : ['1113', '2223']
+        },
+        {
+            'cpr': '8765',
+            'children' : ['2222', '2223']
+        },
+        ]
+
+    analyzer = Analyzer(mockdata)
+
+    expected = {'Percentage of parents who have a child with more than one': approx((2/4)*100)}
+
+    results = analyzer.q11_has_child_with_more_than_one(mockdata)
+
+    assert expected == results
+
+def no_valid_parents_pair():
+
+    """
+    A test to verify correct results
+    """
+
+    mockdata = [
+        {
+            'cpr': '1234',
+            'children' : ['1111', '1112']
+        },
+        {
+            'cpr': '4321',
+            'children' : ['1113', '1114']
+        },
+        {
+            'cpr': '5678',
+            'children' : ['1115', '1116']
+        },
+        {
+            'cpr': '8765',
+            'children' : ['1117', '1118']
+        },
+        ]
+    analyzer = Analyzer(mockdata)
+
+    expected = {'Percentage of parents who have a child with more than one': approx(0.0)}
+
+    results = analyzer.q11_has_child_with_more_than_one(mockdata)
+
+    assert expected == results
+
 

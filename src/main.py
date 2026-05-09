@@ -147,6 +147,8 @@ def main():
 
     print(results_q10)
 
+    print(analyzer.max_number_of_children(data))
+
     ########## ---------- Question 11 ---------- ########## 
     print("\n\nQustion 11 : ")
 

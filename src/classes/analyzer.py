@@ -336,6 +336,20 @@ class Analyzer:
 
         return (year, month, day)
 
+    def max_number_of_children(self, data):
+        if isinstance(data, dict):
+            data = data.values()
+
+        max_children = 0
+
+        for person in data:
+            children = person.get("children", [])
+
+            if len(children) > max_children:
+                max_children = len(children)
+
+        return {'Maximum number of children is': max_children}
+    
 
     def q10_firstborn_gender(self, data):
 
@@ -407,7 +421,6 @@ class Analyzer:
         #this list will only contain unique pairs
         pairs = self.familyrelations.get_parents_pair(data)
         
-
         parent_to_partners = {}
 
         #flattend pair
@@ -447,10 +460,8 @@ class Analyzer:
 
 
         return {'Percentage of parents who have a child with more than one': percentage_has_child_with_more_than_one}
-    
-    def what_is_tallness(self, data):
-        
-    def q12_do_tall_people_marry_each_other(self, data):
+
+
 
 
 
