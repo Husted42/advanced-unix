@@ -448,9 +448,8 @@ class Analyzer:
 
         return {'Percentage of parents who have a child with more than one': percentage_has_child_with_more_than_one}
     
-    def what_is_tallness(self, data):
-        
-    def q12_do_tall_people_marry_each_other(self, data):
+ #   def what_is_tallness(self, data):
+ #   def q12_do_tall_people_marry_each_other(self, data):
 
 
 
