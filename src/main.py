@@ -251,6 +251,34 @@ def main():
 
     print(results_q11)
 
+    ########## ---------- Question 12 ---------- ########## 
+    print("\n\nQustion 12 : ")
+
+    women_stats, men_stats = analyzer.what_is_tallness(data)
+
+    print({
+            "Stats on women's heights" : women_stats,
+            "Stats on men's heights": men_stats
+            })
+
+    modifier = Modifier(data)
+    modifier.q12_add_tallness_category(women_stats, men_stats)
+
+    analyzer = Analyzer(data)
+    result = analyzer.q12_do_tall_people_marry_each_other(data)
+
+    print("Couple tallness distribution:")
+    for couple_type in result["Couple counts"]:
+        count = result["Couple counts"][couple_type]
+        percentage = result["Couple percentages"][couple_type]
+        print(f"{couple_type}: {count} pairs ({percentage:.2f}%)")
+
+    print("\nTallness distribution among parents:")
+    for category in result["Tallness counts"]:
+        count = result["Tallness counts"][category]
+        percentage = result["Tallness percentages"][category]
+        print(f"{category}: {count} parents ({percentage:.2f}%)")
+
     
 if __name__ == "__main__":
     main()

@@ -461,13 +461,207 @@ class Analyzer:
 
         return {'Percentage of parents who have a child with more than one': percentage_has_child_with_more_than_one}
     
- #   def what_is_tallness(self, data):
- #   def q12_do_tall_people_marry_each_other(self, data):
+    def what_is_tallness(self, data):
 
-
-
+        """ 
+        Calculates stats about tallness, in order to find best cutoff for short/normal/thin
+        Benefit of this, is that our tallness criteria depends upon the dataset
         
+        """
 
+        if data is None:
+            data = self.data
+
+        if isinstance(data, dict):
+            data = data.values()
+
+        women_heights = []
+        men_heights = []
+
+        for person in data:
+            cpr = person.get('cpr')
+            height = person.get('height')
+
+            if cpr is None or height is None:
+                continue
+
+            if int(cpr[-1]) % 2 == 0:
+                women_heights.append(height)
+            else: 
+                men_heights.append(height)
+            
+        men_heights.sort()
+        women_heights.sort()
+
+        women_stats = {}
+        men_stats= {}
+
+        total_men = 0
+        total_women = 0
+
+        for  woman_height in  women_heights:
+
+            total_women += woman_height
+
+        women_stats = {
+            'count': len(women_heights),
+            'average': (total_women / len(women_heights)),
+            'shortest': women_heights[0],
+            'tallest': women_heights[-1],
+            'shortest_quartile': women_heights[int((len(women_heights) -1) * 0.25)],
+            'median': women_heights[int((len(women_heights) -1)*0.50)],
+            'tallest_quartile': women_heights[int((len(women_heights) -1) * 0.75)]
+        }   
+        for man_height in men_heights:
+
+            total_men += man_height
+
+            men_stats = {
+                'count': len(men_heights),
+                'average': (total_men / len(men_heights)),
+                'shortest': men_heights[0],
+                'tallest': men_heights[-1],
+                'shortest_quartile': men_heights[int((len(men_heights) -1) * 0.25)],
+                'median': men_heights[int((len(men_heights) -1)*0.50)],
+                'tallest_quartile': men_heights[int((len(men_heights) -1) * 0.75)]
+            }
+
+        return women_stats, men_stats
+            
+
+
+    def q12_do_tall_people_marry_each_other(self, data):
+        """
+        Count parent-pair tallness combos:
+        Tall/Tall, Tall/Normal, Tall/Short, Normal/Normal, Normal/Short, Short/Short
+        """
+
+
+        if data is None:
+            data = self.data
+
+        if isinstance(data, dict):
+            people = data
+            people_list = list(data.values())
+        else:
+            people_list = data
+            people = {person.get("cpr"): person for person in data}
+
+        familyrelations = FamilyRelations(people_list)
+
+        couple_counts = {
+            "Tall/Tall": 0,
+            "Normal/Tall": 0,
+            "Short/Tall": 0,
+            "Normal/Normal": 0,
+            "Normal/Short": 0,
+            "Short/Short": 0
+        }
+
+        seen_parent_pairs = set()
+
+        tall_count = 0
+        normal_count = 0
+        short_count = 0
+
+        for child in people_list:
+            child_cpr = child.get("cpr")
+            parents = familyrelations.get_parents(child_cpr, people_list)
+
+            if len(parents) != 2:
+                continue
+
+            parent_pair = tuple(sorted(parents))
+
+            if parent_pair in seen_parent_pairs:
+                continue
+
+            seen_parent_pairs.add(parent_pair)
+
+            parent1 = people.get(parents[0])
+            parent2 = people.get(parents[1])
+
+            if parent1 is None or parent2 is None:
+                continue
+
+            tallness1 = parent1.get("tallness_category")
+            tallness2 = parent2.get("tallness_category")
+
+            if tallness1 is None or tallness2 is None:
+                continue
+
+            # Sort so Tall/Normal and Normal/Tall are counted together
+            pair = sorted([tallness1, tallness2])
+
+            if pair == ["Tall", "Tall"]:
+                couple_counts["Tall/Tall"] += 1
+                tall_count += 2
+
+            elif pair == ["Normal", 'Tall']:
+                couple_counts["Normal/Tall"] += 1
+                normal_count += 1 
+                tall_count += 1
+            
+            elif pair == ["Short", 'Tall']:
+                couple_counts["Short/Tall"] += 1
+                short_count += 1 
+                tall_count += 1
+                
+            elif pair == ["Normal", "Normal"]:
+                couple_counts["Normal/Normal"] += 1
+                normal_count += 2
+
+            elif pair == ["Normal", "Short"]:
+                couple_counts["Normal/Short"] += 1
+                normal_count += 1 
+                short_count += 1
+
+            elif pair == ["Short", "Short"]:
+                couple_counts["Short/Short"] += 1
+                short_count += 2
+
+        total_parent_pairs = sum(couple_counts.values())
+
+        couple_percentages = {}
+
+        for couple_type, count in couple_counts.items():
+            if total_parent_pairs == 0:
+                couple_percentages[couple_type] = 0
+            else:
+                couple_percentages[couple_type] = (count / total_parent_pairs) * 100
+
+        total_parents = total_parent_pairs * 2
+
+        if total_parents == 0:
+            tallness_percentages = {
+                "Tall": 0,
+                "Normal": 0,
+                "Short": 0
+            }
+        else:
+            tallness_percentages = {
+                "Tall": tall_count / total_parents * 100,
+                "Normal": normal_count / total_parents * 100,
+                "Short": short_count / total_parents * 100
+            }
+
+
+        return {
+            "Total parent pairs": total_parent_pairs,
+            "Couple counts": couple_counts,
+            "Couple percentages": couple_percentages,
+            "Tallness counts": {
+                "Tall": tall_count,
+                "Normal": normal_count,
+                "Short": short_count
+            },
+            "Tallness percentages": tallness_percentages
+        }
+    
+    def q13_do_tal_people_get_tall_children(self, data= None):
+        """
+        Calculates if tall parents also get tall children
+        """
 
     def q14_parent_bmi_couple_distribution(self, data=None):
         """

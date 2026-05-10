@@ -75,6 +75,38 @@ class Modifier:
 
             person["bmi"] = weight / (height_m ** 2)
 
+    def q12_add_tallness_category(self, women_stats, men_stats):
+            for person in self.data:
+
+                cpr = person.get('cpr')
+                height = person.get("height")
+
+                
+
+                #tallness rank for women
+                if int(cpr[-1]) % 2 == 0:
+
+                    if height < women_stats['shortest_quartile']:
+                        person["tallness_category"] = "Short"
+
+                    elif height >= women_stats['tallest_quartile']:
+                        person["tallness_category"] = "Tall"
+
+                    else:
+                        person["tallness_category"] = "Normal"
+
+                # men
+                else:
+
+                    if height < men_stats['shortest_quartile']:
+                        person["tallness_category"] = "Short"
+
+                    elif height >= men_stats['tallest_quartile']:
+                        person["tallness_category"] = "Tall"
+
+                    else:
+                        person["tallness_category"] = "Normal"
+                
 
     def q14_add_bmi_category(self):
         for person in self.data:
