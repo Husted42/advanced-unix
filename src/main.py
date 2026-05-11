@@ -140,6 +140,74 @@ def main():
 
     print(results_q9)
 
+
+    ########## ---------- Question 10 ---------- ########## 
+    print("\n\nQustion 10 : ")
+
+    results_q10 = analyzer.q10_firstborn_gender(data)
+
+    print(results_q10)
+
+    print(analyzer.max_number_of_children(data))
+
+    ########## ---------- Question 11 ---------- ########## 
+    print("\n\nQustion 11 : ")
+
+    results_q11 = analyzer.q11_has_child_with_more_than_one(data)
+
+    print(results_q11)
+
+    ########## ---------- Question 12 ---------- ##########
+    # Do tall people marry (or at least get children togethe 
+    print("\n\nQustion 12 : ")
+
+    women_stats, men_stats = analyzer.what_is_tallness(data)
+
+    print({
+            "Stats on women's heights" : women_stats,
+            "Stats on men's heights": men_stats
+            })
+
+    modifier = Modifier(data)
+    modifier.q12_add_tallness_category(women_stats, men_stats)
+
+    analyzer = Analyzer(data)
+    result_q12 = analyzer.q12_do_tall_people_marry_each_other(data)
+
+    print(result_q12)
+
+    print("Couple tallness distribution:")
+    for couple_type in result_q12["Couple counts"]:
+        count = result_q12["Couple counts"][couple_type]
+        percentage = result_q12["Couple percentages"][couple_type]
+        print(f"{couple_type}: {count} pairs ({percentage:.2f}%)")
+
+    print("\nTallness distribution among parents:")
+    for category in result_q12["Tallness counts"]:
+        count = result_q12["Tallness counts"][category]
+        percentage = result_q12["Tallness percentages"][category]
+        print(f"{category}: {count} parents ({percentage:.2f}%)")
+
+    ########## ---------- Question 13 ---------- ########## 
+    #Do tall people get tall children?}
+    print("\n\nQustion 13 : ")
+
+    results_q13 = analyzer.q13_do_tal_people_get_tall_children(data)
+
+    print(results_q13)
+
+    print("\nTallness distribution among children and parents:")
+    for group in results_q13:
+        total_children = results_q13[group]["Total children"]
+        tall_children = results_q13[group]["Tall children"]
+        percentage = results_q13[group]["Percentage tall children"]
+
+        print(f"{group}:")
+        print(f"  Total children: {total_children}")
+        print(f"  Tall children: {tall_children}")
+        print(f"  Percentage tall children: {percentage:.2f}%\n")
+
+
     ########## ---------- Question 14 ---------- ##########
     '''
         Do fat people marry?
@@ -233,73 +301,6 @@ def main():
         if i >= 5:
             break
         print(child)
-
-
-    ########## ---------- Question 10 ---------- ########## 
-    print("\n\nQustion 10 : ")
-
-    results_q10 = analyzer.q10_firstborn_gender(data)
-
-    print(results_q10)
-
-    print(analyzer.max_number_of_children(data))
-
-    ########## ---------- Question 11 ---------- ########## 
-    print("\n\nQustion 11 : ")
-
-    results_q11 = analyzer.q11_has_child_with_more_than_one(data)
-
-    print(results_q11)
-
-    ########## ---------- Question 12 ---------- ##########
-    # Do tall people marry (or at least get children togethe 
-    print("\n\nQustion 12 : ")
-
-    women_stats, men_stats = analyzer.what_is_tallness(data)
-
-    print({
-            "Stats on women's heights" : women_stats,
-            "Stats on men's heights": men_stats
-            })
-
-    modifier = Modifier(data)
-    modifier.q12_add_tallness_category(women_stats, men_stats)
-
-    analyzer = Analyzer(data)
-    result_q12 = analyzer.q12_do_tall_people_marry_each_other(data)
-
-    print(result_q12)
-
-    print("Couple tallness distribution:")
-    for couple_type in result_q12["Couple counts"]:
-        count = result_q12["Couple counts"][couple_type]
-        percentage = result_q12["Couple percentages"][couple_type]
-        print(f"{couple_type}: {count} pairs ({percentage:.2f}%)")
-
-    print("\nTallness distribution among parents:")
-    for category in result_q12["Tallness counts"]:
-        count = result_q12["Tallness counts"][category]
-        percentage = result_q12["Tallness percentages"][category]
-        print(f"{category}: {count} parents ({percentage:.2f}%)")
-
-    ########## ---------- Question 13 ---------- ########## 
-    #Do tall people get tall children?}
-    print("\n\nQustion 13 : ")
-
-    results_q13 = analyzer.q13_do_tal_people_get_tall_children(data)
-
-    print(results_q13)
-
-    print("\nTallness distribution among children and parents:")
-    for group in results_q13:
-        total_children = results_q13[group]["Total children"]
-        tall_children = results_q13[group]["Tall children"]
-        percentage = results_q13[group]["Percentage tall children"]
-
-        print(f"{group}:")
-        print(f"  Total children: {total_children}")
-        print(f"  Tall children: {tall_children}")
-        print(f"  Percentage tall children: {percentage:.2f}%\n")
 
     
 if __name__ == "__main__":
