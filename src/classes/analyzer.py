@@ -564,6 +564,7 @@ class Analyzer:
         normal_count = 0
         short_count = 0
 
+        #O(n), where n is people in data
         for child in people_list:
             child_cpr = child.get("cpr")
             parents = familyrelations.get_parents(child_cpr, people_list)
@@ -571,6 +572,7 @@ class Analyzer:
             if len(parents) != 2:
                 continue
 
+            #sorts parents pair to avoid duplicates        
             parent_pair = tuple(sorted(parents))
 
             if parent_pair in seen_parent_pairs:
@@ -584,6 +586,7 @@ class Analyzer:
             if parent1 is None or parent2 is None:
                 continue
 
+            #add category to each parent
             tallness1 = parent1.get("tallness_category")
             tallness2 = parent2.get("tallness_category")
 
@@ -593,6 +596,7 @@ class Analyzer:
             # Sort so Tall/Normal and Normal/Tall are counted together
             pair = sorted([tallness1, tallness2])
 
+            #counts couples categories and height distribution
             if pair == ["Tall", "Tall"]:
                 couple_counts["Tall/Tall"] += 1
                 tall_count += 2
@@ -625,6 +629,7 @@ class Analyzer:
         couple_percentages = {}
 
         for couple_type, count in couple_counts.items():
+            #avoid zero division
             if total_parent_pairs == 0:
                 couple_percentages[couple_type] = 0
             else:
@@ -632,6 +637,7 @@ class Analyzer:
 
         total_parents = total_parent_pairs * 2
 
+        #calculations for comparisment
         if total_parents == 0:
             tallness_percentages = {
                 "Tall": 0,
@@ -662,6 +668,93 @@ class Analyzer:
         """
         Calculates if tall parents also get tall children
         """
+
+        if data is None:
+            data = self.data
+
+        if isinstance(data, dict):
+            people = data
+            people_list = list(data.values())
+        else:
+            people_list = data
+        
+
+        #dictionaire to keep track of wether tall children have tall parents
+        groups = {
+            'O tall parents': {'total_children': 0, 'tall_children': 0},
+            '1 tall parents': {'total_children': 0, 'tall_children': 0},
+            '2 tall parents': {'total_children': 0, 'tall_children': 0}
+        }
+        people = {}
+
+        for person in people_list:
+            cpr = person.get("cpr")
+            if cpr is not None:
+                people[cpr] = person
+    
+        familyrelations = FamilyRelations(people_list)
+
+        for child in people_list:
+            child_cpr = child.get('cpr')
+            child_tallness = child.get('tallness_category')
+
+            if child_cpr is None or child_tallness is None:
+                continue
+            
+            parents = familyrelations.get_parents(child_cpr, people_list)
+
+            if len(parents) == 0:
+                continue
+
+            tall_parent_count = 0
+            parent_count = 0
+
+            for parent_cpr in parents:
+                parent = people.get(parent_cpr)
+
+                if parent is None:
+                    continue
+
+                parent_tallness = parent.get('tallness_category')
+
+                if parent_tallness is None:
+                    continue
+
+                parent_count += 1
+
+                if parent_tallness == 'Tall':
+                    tall_parent_count += 1
+            
+            if tall_parent_count == 0:
+                group = 'O tall parents'
+            elif tall_parent_count == 1:
+                group = '1 tall parents'
+            else:
+                group = '2 tall parents'
+
+            groups[group]['total_children'] += 1
+
+            if child_tallness == 'Tall':
+                groups[group]['tall_children'] += 1 
+
+        results = {}
+
+        for group_name in groups:
+            total_children = groups[group_name]["total_children"]
+            tall_children = groups[group_name]["tall_children"]
+
+            if total_children == 0:
+                percentage = 0
+            else:
+                percentage = tall_children / total_children * 100
+
+            results[group_name] = {
+                "Total children": total_children,
+                "Tall children": tall_children,
+                "Percentage tall children": percentage
+            }
+
+        return results
 
     def q14_parent_bmi_couple_distribution(self, data=None):
         """

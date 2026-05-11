@@ -251,7 +251,8 @@ def main():
 
     print(results_q11)
 
-    ########## ---------- Question 12 ---------- ########## 
+    ########## ---------- Question 12 ---------- ##########
+    # Do tall people marry (or at least get children togethe 
     print("\n\nQustion 12 : ")
 
     women_stats, men_stats = analyzer.what_is_tallness(data)
@@ -265,19 +266,40 @@ def main():
     modifier.q12_add_tallness_category(women_stats, men_stats)
 
     analyzer = Analyzer(data)
-    result = analyzer.q12_do_tall_people_marry_each_other(data)
+    result_q12 = analyzer.q12_do_tall_people_marry_each_other(data)
+
+    print(result_q12)
 
     print("Couple tallness distribution:")
-    for couple_type in result["Couple counts"]:
-        count = result["Couple counts"][couple_type]
-        percentage = result["Couple percentages"][couple_type]
+    for couple_type in result_q12["Couple counts"]:
+        count = result_q12["Couple counts"][couple_type]
+        percentage = result_q12["Couple percentages"][couple_type]
         print(f"{couple_type}: {count} pairs ({percentage:.2f}%)")
 
     print("\nTallness distribution among parents:")
-    for category in result["Tallness counts"]:
-        count = result["Tallness counts"][category]
-        percentage = result["Tallness percentages"][category]
+    for category in result_q12["Tallness counts"]:
+        count = result_q12["Tallness counts"][category]
+        percentage = result_q12["Tallness percentages"][category]
         print(f"{category}: {count} parents ({percentage:.2f}%)")
+
+    ########## ---------- Question 13 ---------- ########## 
+    #Do tall people get tall children?}
+    print("\n\nQustion 13 : ")
+
+    results_q13 = analyzer.q13_do_tal_people_get_tall_children(data)
+
+    print(results_q13)
+
+    print("\nTallness distribution among children and parents:")
+    for group in results_q13:
+        total_children = results_q13[group]["Total children"]
+        tall_children = results_q13[group]["Tall children"]
+        percentage = results_q13[group]["Percentage tall children"]
+
+        print(f"{group}:")
+        print(f"  Total children: {total_children}")
+        print(f"  Tall children: {tall_children}")
+        print(f"  Percentage tall children: {percentage:.2f}%\n")
 
     
 if __name__ == "__main__":
